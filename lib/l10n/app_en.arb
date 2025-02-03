@@ -1,0 +1,32 @@
+{
+    "appTitle": "Music Practice",
+    "@appTitle": {
+        "description": "The title of the application"
+    },
+    "homeTitle": "Welcome to Music Practice",
+    "@homeTitle": {
+        "description": "Title for the home screen"
+    },
+    "practiceNow": "Practice Now",
+    "@practiceNow": {
+        "description": "Button to start practicing"
+    },
+    "settings": "Settings",
+    "@settings": {
+        "description": "Settings menu item"
+    },
+    "language": "Language",
+    "@language": {
+        "description": "Language selection option"
+    },
+    "dashboardTotalTime": "Total Time Today",
+    "dashboardExercises": "Exercises Today",
+    "@dashboardTotalTime": {
+        "description": "Title for the total practice time card in the dashboard"
+    },
+    "@dashboardExercises": {
+        "description": "Title for the exercises count card in the dashboard"
+    },
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
+} 

@@ -1,0 +1,17 @@
+{
+    "appTitle": "Prática Musical",
+    "homeTitle": "Bem-vindo à Prática Musical",
+    "practiceNow": "Praticar Agora",
+    "settings": "Configurações",
+    "language": "Idioma",
+    "dashboardTotalTime": "Tempo Total Hoje",
+    "dashboardExercises": "Exercícios Hoje",
+    "lightMode": "Modo Claro",
+    "darkMode": "Modo Escuro",
+    "@dashboardTotalTime": {
+        "description": "Title for the total practice time card in the dashboard"
+    },
+    "@dashboardExercises": {
+        "description": "Title for the exercises count card in the dashboard"
+    }
+} 
