@@ -28,6 +28,15 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+      notificationCategories: [
+        DarwinNotificationCategory(
+          'daily_reminder',
+          options: {
+            DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+            DarwinNotificationCategoryOption.allowAnnouncement,
+          },
+        ),
+      ],
     );
 
     await _notifications.initialize(
@@ -132,7 +141,8 @@ class NotificationService {
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
-            interruptionLevel: InterruptionLevel.active,
+            interruptionLevel: InterruptionLevel.timeSensitive,
+            categoryIdentifier: 'daily_reminder',
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
