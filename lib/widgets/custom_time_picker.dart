@@ -40,20 +40,25 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             diameterRatio: 1.2,
             physics: const FixedExtentScrollPhysics(),
             childDelegate: ListWheelChildBuilderDelegate(
-              childCount: 24,
+              childCount: MediaQuery.of(context).alwaysUse24HourFormat ? 24 : 12,
               builder: (context, index) {
+                final hour = MediaQuery.of(context).alwaysUse24HourFormat 
+                  ? index 
+                  : (selectedHour >= 12 ? ((index == 0 ? 12 : index) % 12) + 12 : (index == 0 ? 12 : index));
                 return Container(
                   decoration: BoxDecoration(
-                    color: selectedHour == index ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+                    color: selectedHour == hour ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
-                      index.toString().padLeft(2, '0'),
+                      MediaQuery.of(context).alwaysUse24HourFormat
+                        ? hour.toString().padLeft(2, '0')
+                        : TimeOfDay(hour: hour, minute: 0).format(context),
                       style: TextStyle(
-                        fontSize: selectedHour == index ? 24 : 20,
-                        fontWeight: selectedHour == index ? FontWeight.bold : FontWeight.normal,
-                        color: selectedHour == index 
+                        fontSize: selectedHour == hour ? 24 : 20,
+                        fontWeight: selectedHour == hour ? FontWeight.bold : FontWeight.normal,
+                        color: selectedHour == hour 
                           ? (Theme.of(context).brightness == Brightness.dark 
                               ? Colors.white 
                               : Theme.of(context).primaryColor)
@@ -66,7 +71,9 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             ),
             onSelectedItemChanged: (index) {
               setState(() {
-                selectedHour = index;
+                selectedHour = MediaQuery.of(context).alwaysUse24HourFormat 
+                  ? index 
+                  : (selectedHour >= 12 ? ((index == 0 ? 12 : index) % 12) + 12 : (index == 0 ? 12 : index));
                 widget.onTimeChanged(TimeOfDay(hour: selectedHour, minute: selectedMinute));
               });
             },
