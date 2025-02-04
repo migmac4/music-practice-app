@@ -28,19 +28,19 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      notificationCategories: [
+      notificationCategories: const <DarwinNotificationCategory>[
         DarwinNotificationCategory(
           'daily_reminder',
-          actions: [
+          actions: <DarwinNotificationAction>[
             DarwinNotificationAction.plain(
               'MARK_AS_READ',
               'OK',
-              options: {
+              options: <DarwinNotificationActionOption>{
                 DarwinNotificationActionOption.foreground,
               },
             ),
           ],
-          options: {
+          options: <DarwinNotificationCategoryOption>{
             DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
             DarwinNotificationCategoryOption.allowAnnouncement,
             DarwinNotificationCategoryOption.allowInCarPlay,
@@ -157,9 +157,10 @@ class NotificationService {
           presentBadge: true,
           presentSound: true,
           sound: 'default',
-          interruptionLevel: InterruptionLevel.timeSensitive,
+          interruptionLevel: InterruptionLevel.critical,
           categoryIdentifier: 'daily_reminder',
           threadIdentifier: 'daily_reminder',
+          importance: Importance.max,
         ),
       );
 
