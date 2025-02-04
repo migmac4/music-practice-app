@@ -132,6 +132,7 @@ class NotificationService {
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
+            interruptionLevel: InterruptionLevel.active,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
