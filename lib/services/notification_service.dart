@@ -31,10 +31,20 @@ class NotificationService {
       notificationCategories: [
         DarwinNotificationCategory(
           'daily_reminder',
+          actions: [
+            DarwinNotificationAction.plain(
+              'MARK_AS_READ',
+              'OK',
+              options: {
+                DarwinNotificationActionOption.foreground,
+              },
+            ),
+          ],
           options: {
             DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
             DarwinNotificationCategoryOption.allowAnnouncement,
             DarwinNotificationCategoryOption.allowInCarPlay,
+            DarwinNotificationCategoryOption.provisional,
           },
         ),
       ],
@@ -140,28 +150,33 @@ class NotificationService {
       print('DEBUG: Scheduling notification for ${scheduledTZDate.toString()}');
       print('DEBUG: Android Details: ${androidDetails.toString()}');
       
+      final notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: 'default',
+          interruptionLevel: InterruptionLevel.timeSensitive,
+          categoryIdentifier: 'daily_reminder',
+          threadIdentifier: 'daily_reminder',
+        ),
+      );
+
+      print('DEBUG: Notification details: $notificationDetails');
+      
       await _notifications.zonedSchedule(
         0,
         title,
         body,
         scheduledTZDate,
-        NotificationDetails(
-          android: androidDetails,
-          iOS: const DarwinNotificationDetails(
-            presentAlert: true,
-            presentBadge: true,
-            presentSound: true,
-            sound: 'default',
-            interruptionLevel: InterruptionLevel.timeSensitive,
-            threadIdentifier: 'daily_reminder',
-            categoryIdentifier: 'daily_reminder',
-          ),
-        ),
+        notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+      
       print('DEBUG: Notification scheduled successfully');
       print('DEBUG: Notification settings - Title: $title, Body: $body, Time: ${scheduledTZDate.toString()}');
     } catch (e) {
