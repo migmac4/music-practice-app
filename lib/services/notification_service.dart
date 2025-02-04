@@ -28,29 +28,9 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      notificationCategories: const <DarwinNotificationCategory>[
-        DarwinNotificationCategory(
-          'daily_reminder',
-          actions: <DarwinNotificationAction>[
-            DarwinNotificationAction.plain(
-              'MARK_AS_READ',
-              'OK',
-              options: <DarwinNotificationActionOption>{
-                DarwinNotificationActionOption.foreground,
-              },
-            ),
-          ],
-          options: <DarwinNotificationCategoryOption>{
-            DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
-            DarwinNotificationCategoryOption.allowAnnouncement,
-            DarwinNotificationCategoryOption.allowInCarPlay,
-            DarwinNotificationCategoryOption.provisional,
-          },
-        ),
-      ],
     );
 
-    print('DEBUG: Initializing notifications with iOS settings: $iosSettings');
+    print('DEBUG: Starting notification initialization');
 
     await _notifications.initialize(
       const InitializationSettings(
@@ -58,10 +38,12 @@ class NotificationService {
         iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: (NotificationResponse details) {
-        print('Notification response received: ${details.actionId}');
+        print('DEBUG: Notification response received: ${details.payload}');
       },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
+
+    print('DEBUG: Notification initialization completed');
 
     // Solicita permissão de notificação no Android
     final androidPlatform = _notifications.resolvePlatformSpecificImplementation<
@@ -131,47 +113,46 @@ class NotificationService {
 
     final scheduledTZDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
-    final androidDetails = AndroidNotificationDetails(
-      'daily_reminder',
-      'Daily Practice Reminder',
-      channelDescription: 'Reminds you to practice every day',
-      importance: Importance.max,
-      priority: Priority.high,
-      styleInformation: const BigTextStyleInformation(''),
-      playSound: true,
-      enableVibration: true,
-      fullScreenIntent: true,
-      visibility: NotificationVisibility.public,
-      ongoing: true,
-      autoCancel: false,
-    );
-
     try {
       print('DEBUG: Scheduling notification for ${scheduledTZDate.toString()}');
-      print('DEBUG: Android Details: ${androidDetails.toString()}');
       
-      final notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-          sound: 'default',
-          interruptionLevel: InterruptionLevel.critical,
-          categoryIdentifier: 'daily_reminder',
-          threadIdentifier: 'daily_reminder',
-          importance: Importance.max,
-        ),
+      const iOSPlatformChannelSpecifics = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'default',
+        interruptionLevel: InterruptionLevel.active,
       );
 
-      print('DEBUG: Notification details: $notificationDetails');
+      const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'daily_reminder',
+        'Daily Practice Reminder',
+        channelDescription: 'Reminds you to practice every day',
+        importance: Importance.max,
+        priority: Priority.high,
+        ongoing: true,
+        styleInformation: BigTextStyleInformation(''),
+        playSound: true,
+        enableVibration: true,
+        visibility: NotificationVisibility.public,
+      );
+
+      const platformChannelSpecifics = NotificationDetails(
+        iOS: iOSPlatformChannelSpecifics,
+        android: androidPlatformChannelSpecifics,
+      );
+
+      print('DEBUG: About to schedule notification with following details:');
+      print('DEBUG: Title: $title');
+      print('DEBUG: Body: $body');
+      print('DEBUG: Time: ${scheduledTZDate.toString()}');
       
       await _notifications.zonedSchedule(
         0,
         title,
         body,
         scheduledTZDate,
-        notificationDetails,
+        platformChannelSpecifics,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
@@ -179,7 +160,6 @@ class NotificationService {
       );
       
       print('DEBUG: Notification scheduled successfully');
-      print('DEBUG: Notification settings - Title: $title, Body: $body, Time: ${scheduledTZDate.toString()}');
     } catch (e) {
       print('ERROR: Failed to schedule notification: $e');
       print('ERROR Stack trace: ${StackTrace.current}');
