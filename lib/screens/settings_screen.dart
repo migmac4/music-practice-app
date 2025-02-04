@@ -192,9 +192,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   String _formatTimeOfDay(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+    final context = this.context;
+    return MediaQuery.of(context).alwaysUse24HourFormat
+        ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'
+        : time.format(context);
   }
 
   String _getInstrumentName(Instrument instrument, AppLocalizations l10n) {
