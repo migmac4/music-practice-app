@@ -8,10 +8,89 @@
     "dashboardExercises": "Exercícios Hoje",
     "lightMode": "Modo Claro",
     "darkMode": "Modo Escuro",
+    "languageEnglish": "Inglês",
+    "languagePortuguese": "Português",
+    "dailyReminder": "Lembrete Diário",
+    "reminderTime": "Horário do Lembrete",
+    "reminderEnabled": "Ativar Lembrete Diário",
+    "reminderNotificationTitle": "Hora de Praticar!",
+    "reminderNotificationBody": "Não se esqueça de praticar hoje!",
+    "selectTime": "Selecionar Horário",
+    "ok": "OK",
     "@dashboardTotalTime": {
         "description": "Title for the total practice time card in the dashboard"
     },
     "@dashboardExercises": {
         "description": "Title for the exercises count card in the dashboard"
-    }
+    },
+    "@lightMode": {
+        "description": "Light theme mode option"
+    },
+    "@darkMode": {
+        "description": "Dark theme mode option"
+    },
+    "@languageEnglish": {
+        "description": "English language name"
+    },
+    "@languagePortuguese": {
+        "description": "Portuguese language name"
+    },
+    "@dailyReminder": {
+        "description": "Daily reminder section title"
+    },
+    "@reminderTime": {
+        "description": "Time for daily reminder"
+    },
+    "@reminderEnabled": {
+        "description": "Toggle for enabling daily reminder"
+    },
+    "@reminderNotificationTitle": {
+        "description": "Title for the reminder notification"
+    },
+    "@reminderNotificationBody": {
+        "description": "Body text for the reminder notification"
+    },
+    "instrument": "Instrumento",
+    "instrumentAcousticGuitar": "Violão",
+    "instrumentBass": "Baixo",
+    "instrumentCello": "Violoncelo",
+    "instrumentClarinet": "Clarinete",
+    "instrumentDrums": "Bateria",
+    "instrumentElectricGuitar": "Guitarra",
+    "instrumentFlute": "Flauta",
+    "instrumentKeyboard": "Teclado",
+    "instrumentPiano": "Piano",
+    "instrumentSaxophone": "Saxofone",
+    "instrumentTrumpet": "Trompete",
+    "instrumentUkulele": "Ukulele",
+    "instrumentViolin": "Violino",
+    "@practiceCategorySection": {
+        "description": "Practice category translations section"
+    },
+    "practiceCategoryTitle": "Categoria",
+    "practiceCategoryChordsAndHarmony": "Acordes e Harmonia",
+    "practiceCategoryTechnique": "Técnica",
+    "practiceCategoryTheory": "Teoria",
+    "practiceCategoryImprovisation": "Improvisação",
+    "practiceCategoryRepertoire": "Repertório",
+    "practiceCategoryScalesAndModes": "Escalas e Modos",
+    "practiceCategoryRhythmAndStrumming": "Ritmo e Strumming",
+    "practiceCategoryBowingTechnique": "Técnica de Arco",
+    "practiceCategoryExpressionAndDynamics": "Expressão e Dinâmica",
+    "practiceCategoryShiftingAndPosition": "Mudança de Posição",
+    "practiceCategoryScalesAndArpeggios": "Escalas e Arpejos",
+    "practiceCategoryLeftHandTechnique": "Técnica de Mão Esquerda",
+    "practiceCategoryRhythmAndGroove": "Ritmo e Groove",
+    "practiceCategoryRudimentsAndStickControl": "Rudimentos e Controle de Baquetas",
+    "practiceCategoryDynamicsAndArticulation": "Dinâmica e Articulação",
+    "practiceCategoryEmbouchureAndBreathControl": "Embocadura e Controle Respiratório",
+    "practiceCategoryFingerTechnique": "Técnica de Dedilhado",
+    "practiceCategoryRegisterTransitions": "Transições de Registro",
+    "practiceCategoryArticulationAndTonguing": "Articulação e Língua",
+    "practiceCategoryScalesAndIntonation": "Escalas e Afinação",
+    "practiceCategoryPostureAndHandPosition": "Postura e Posição das Mãos",
+    "practiceCategoryReadingTechniques": "Técnicas de Leitura",
+    "practiceCategorySynthesizerAndSampling": "Sintetizador e Sampling",
+    "practiceCategoryScalesAndMelody": "Escalas e Melodia",
+    "practiceCategoryRhythmAndTiming": "Ritmo e Tempo"
 } 

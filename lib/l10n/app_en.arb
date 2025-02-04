@@ -28,5 +28,126 @@
         "description": "Title for the exercises count card in the dashboard"
     },
     "lightMode": "Light Mode",
-    "darkMode": "Dark Mode"
+    "darkMode": "Dark Mode",
+    "@lightMode": {
+        "description": "Light theme mode option"
+    },
+    "@darkMode": {
+        "description": "Dark theme mode option"
+    },
+    "languageEnglish": "English",
+    "@languageEnglish": {
+        "description": "English language name"
+    },
+    "languagePortuguese": "Portuguese",
+    "@languagePortuguese": {
+        "description": "Portuguese language name"
+    },
+    "dailyReminder": "Daily Reminder",
+    "@dailyReminder": {
+        "description": "Daily reminder section title"
+    },
+    "reminderTime": "Reminder Time",
+    "@reminderTime": {
+        "description": "Time for daily reminder"
+    },
+    "reminderEnabled": "Enable Daily Reminder",
+    "@reminderEnabled": {
+        "description": "Toggle for enabling daily reminder"
+    },
+    "reminderNotificationTitle": "Time to Practice!",
+    "@reminderNotificationTitle": {
+        "description": "Title for the reminder notification"
+    },
+    "reminderNotificationBody": "Don't forget to practice today!",
+    "@reminderNotificationBody": {
+        "description": "Body text for the reminder notification"
+    },
+    "selectTime": "Select Time",
+    "ok": "OK",
+    "instrument": "Instrument",
+    "@instrument": {
+        "description": "Instrument selection section title"
+    },
+    "instrumentAcousticGuitar": "Acoustic Guitar",
+    "@instrumentAcousticGuitar": {
+        "description": "Acoustic Guitar instrument name"
+    },
+    "instrumentBass": "Bass",
+    "@instrumentBass": {
+        "description": "Bass instrument name"
+    },
+    "instrumentCello": "Cello",
+    "@instrumentCello": {
+        "description": "Cello instrument name"
+    },
+    "instrumentClarinet": "Clarinet",
+    "@instrumentClarinet": {
+        "description": "Clarinet instrument name"
+    },
+    "instrumentDrums": "Drums",
+    "@instrumentDrums": {
+        "description": "Drums instrument name"
+    },
+    "instrumentElectricGuitar": "Electric Guitar",
+    "@instrumentElectricGuitar": {
+        "description": "Electric Guitar instrument name"
+    },
+    "instrumentFlute": "Flute",
+    "@instrumentFlute": {
+        "description": "Flute instrument name"
+    },
+    "instrumentKeyboard": "Keyboard",
+    "@instrumentKeyboard": {
+        "description": "Keyboard instrument name"
+    },
+    "instrumentPiano": "Piano",
+    "@instrumentPiano": {
+        "description": "Piano instrument name"
+    },
+    "instrumentSaxophone": "Saxophone",
+    "@instrumentSaxophone": {
+        "description": "Saxophone instrument name"
+    },
+    "instrumentTrumpet": "Trumpet",
+    "@instrumentTrumpet": {
+        "description": "Trumpet instrument name"
+    },
+    "instrumentUkulele": "Ukulele",
+    "@instrumentUkulele": {
+        "description": "Ukulele instrument name"
+    },
+    "instrumentViolin": "Violin",
+    "@instrumentViolin": {
+        "description": "Violin instrument name"
+    },
+    "@practiceCategorySection": {
+        "description": "Practice category translations section"
+    },
+    "practiceCategoryTitle": "Category",
+    "practiceCategoryChordsAndHarmony": "Chords & Harmony",
+    "practiceCategoryTechnique": "Technique",
+    "practiceCategoryTheory": "Theory",
+    "practiceCategoryImprovisation": "Improvisation",
+    "practiceCategoryRepertoire": "Repertoire",
+    "practiceCategoryScalesAndModes": "Scales & Modes",
+    "practiceCategoryRhythmAndStrumming": "Rhythm & Strumming",
+    "practiceCategoryBowingTechnique": "Bowing Technique",
+    "practiceCategoryExpressionAndDynamics": "Expression & Dynamics",
+    "practiceCategoryShiftingAndPosition": "Shifting & Position",
+    "practiceCategoryScalesAndArpeggios": "Scales & Arpeggios",
+    "practiceCategoryLeftHandTechnique": "Left Hand Technique",
+    "practiceCategoryRhythmAndGroove": "Rhythm & Groove",
+    "practiceCategoryRudimentsAndStickControl": "Rudiments & Stick Control",
+    "practiceCategoryDynamicsAndArticulation": "Dynamics & Articulation",
+    "practiceCategoryEmbouchureAndBreathControl": "Embouchure & Breath Control",
+    "practiceCategoryFingerTechnique": "Finger Technique",
+    "practiceCategoryRegisterTransitions": "Register Transitions",
+    "practiceCategoryArticulationAndTonguing": "Articulation & Tonguing",
+    "practiceCategoryScalesAndIntonation": "Scales & Intonation",
+    "practiceCategoryPostureAndHandPosition": "Posture & Hand Position",
+    "practiceCategoryReadingTechniques": "Reading Techniques",
+    "practiceCategorySynthesizerAndSampling": "Synthesizer & Sampling",
+    "practiceCategoryScalesAndMelody": "Scales & Melody",
+    "practiceCategoryRhythmAndTiming": "Rhythm & Timing"
 } 
