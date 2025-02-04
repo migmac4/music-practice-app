@@ -31,9 +31,19 @@ class NotificationService {
       notificationCategories: [
         DarwinNotificationCategory(
           'daily_reminder',
+          actions: [
+            DarwinNotificationAction.plain(
+              'MARK_AS_READ',
+              'OK',
+              options: {
+                DarwinNotificationActionOption.foreground,
+              },
+            ),
+          ],
           options: {
             DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
             DarwinNotificationCategoryOption.allowAnnouncement,
+            DarwinNotificationCategoryOption.allowInCarPlay,
           },
         ),
       ],
@@ -44,7 +54,12 @@ class NotificationService {
         android: androidSettings,
         iOS: iosSettings,
       ),
-      onDidReceiveNotificationResponse: (NotificationResponse details) {},
+      onDidReceiveNotificationResponse: (NotificationResponse details) {
+        if (details.actionId == 'MARK_AS_READ') {
+          // A notificação foi lida/descartada pelo usuário
+          print('Notification dismissed by user action');
+        }
+      },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
@@ -141,13 +156,16 @@ class NotificationService {
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
+            sound: 'default',
             interruptionLevel: InterruptionLevel.timeSensitive,
             categoryIdentifier: 'daily_reminder',
+            threadIdentifier: 'daily_reminder',
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
       );
     } catch (e) {
       // Keep error logging for debugging purposes
