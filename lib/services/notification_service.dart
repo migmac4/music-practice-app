@@ -28,25 +28,6 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      notificationCategories: <DarwinNotificationCategory>[
-        DarwinNotificationCategory(
-          'daily_reminder',
-          actions: <DarwinNotificationAction>[
-            DarwinNotificationAction.plain(
-              'MARK_AS_READ',
-              'OK',
-              options: <DarwinNotificationActionOption>{
-                DarwinNotificationActionOption.foreground,
-              },
-            ),
-          ],
-          options: <DarwinNotificationCategoryOption>{
-            DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
-            DarwinNotificationCategoryOption.allowAnnouncement,
-            DarwinNotificationCategoryOption.allowInCarPlay,
-          },
-        ),
-      ],
     );
 
     await _notifications.initialize(
@@ -55,10 +36,7 @@ class NotificationService {
         iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: (NotificationResponse details) {
-        if (details.actionId == 'MARK_AS_READ') {
-          // A notificação foi lida/descartada pelo usuário
-          print('Notification dismissed by user action');
-        }
+        print('Notification response received: ${details.actionId}');
       },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
@@ -135,13 +113,15 @@ class NotificationService {
       'daily_reminder',
       'Daily Practice Reminder',
       channelDescription: 'Reminds you to practice every day',
-      importance: Importance.high,
+      importance: Importance.max,
       priority: Priority.high,
       styleInformation: const BigTextStyleInformation(''),
       playSound: true,
       enableVibration: true,
       fullScreenIntent: true,
       visibility: NotificationVisibility.public,
+      ongoing: true,
+      autoCancel: false,
     );
 
     try {
@@ -158,8 +138,6 @@ class NotificationService {
             presentSound: true,
             sound: 'default',
             interruptionLevel: InterruptionLevel.timeSensitive,
-            categoryIdentifier: 'daily_reminder',
-            threadIdentifier: 'daily_reminder',
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
