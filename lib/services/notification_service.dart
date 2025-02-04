@@ -30,20 +30,14 @@ class NotificationService {
       requestSoundPermission: true,
     );
 
-    print('DEBUG: Starting notification initialization');
-
     await _notifications.initialize(
       const InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
       ),
-      onDidReceiveNotificationResponse: (NotificationResponse details) {
-        print('DEBUG: Notification response received: ${details.payload}');
-      },
+      onDidReceiveNotificationResponse: (NotificationResponse details) {},
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
-
-    print('DEBUG: Notification initialization completed');
 
     // Solicita permissão de notificação no Android
     final androidPlatform = _notifications.resolvePlatformSpecificImplementation<
@@ -54,7 +48,6 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
-    // Removed debug print
     final platform = _notifications.resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>();
     if (platform != null) {
@@ -114,14 +107,14 @@ class NotificationService {
     final scheduledTZDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
     try {
-      print('DEBUG: Scheduling notification for ${scheduledTZDate.toString()}');
-      
       const iOSPlatformChannelSpecifics = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
         sound: 'default',
-        interruptionLevel: InterruptionLevel.active,
+        interruptionLevel: InterruptionLevel.critical,
+        threadIdentifier: 'daily_reminder',
+        categoryIdentifier: 'reminder',
       );
 
       const androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -141,11 +134,6 @@ class NotificationService {
         iOS: iOSPlatformChannelSpecifics,
         android: androidPlatformChannelSpecifics,
       );
-
-      print('DEBUG: About to schedule notification with following details:');
-      print('DEBUG: Title: $title');
-      print('DEBUG: Body: $body');
-      print('DEBUG: Time: ${scheduledTZDate.toString()}');
       
       await _notifications.zonedSchedule(
         0,
@@ -158,11 +146,9 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-      
-      print('DEBUG: Notification scheduled successfully');
     } catch (e) {
+      // Mantém apenas o log de erro sem o stack trace
       print('ERROR: Failed to schedule notification: $e');
-      print('ERROR Stack trace: ${StackTrace.current}');
     }
   }
 
