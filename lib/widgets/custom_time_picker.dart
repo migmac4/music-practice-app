@@ -18,6 +18,7 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
   late int selectedHour;
   late int selectedMinute;
   late bool isAM;
+  bool _initialized = false;
 
   @override
   void initState() {
@@ -25,14 +26,20 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
     selectedHour = widget.initialTime.hour;
     selectedMinute = widget.initialTime.minute;
     isAM = selectedHour < 12;
-    if (!MediaQuery.of(context).alwaysUse24HourFormat) {
-      selectedHour = selectedHour % 12;
-      if (selectedHour == 0) selectedHour = 12;
+  }
+
+  void _initializeTimeFormat(BuildContext context) {
+    if (!_initialized) {
+      if (!MediaQuery.of(context).alwaysUse24HourFormat) {
+        selectedHour = selectedHour % 12;
+        if (selectedHour == 0) selectedHour = 12;
+      }
+      _initialized = true;
     }
   }
 
-  String _formatHour(int hour) {
-    if (MediaQuery.of(context).alwaysUse24HourFormat) {
+  String _formatHour(int hour, bool use24HourFormat) {
+    if (use24HourFormat) {
       return hour.toString().padLeft(2, '0');
     } else {
       if (hour == 0) return '12';
@@ -43,6 +50,7 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
   @override
   Widget build(BuildContext context) {
     final use24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
+    _initializeTimeFormat(context);
     
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -69,7 +77,7 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
                   ),
                   child: Center(
                     child: Text(
-                      _formatHour(displayHour),
+                      _formatHour(displayHour, use24HourFormat),
                       style: TextStyle(
                         fontSize: isSelected ? 24 : 20,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
