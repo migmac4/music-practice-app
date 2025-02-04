@@ -28,19 +28,19 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      notificationCategories: [
+      notificationCategories: <DarwinNotificationCategory>[
         DarwinNotificationCategory(
           'daily_reminder',
-          actions: [
+          actions: <DarwinNotificationAction>[
             DarwinNotificationAction.plain(
               'MARK_AS_READ',
               'OK',
-              options: {
+              options: <DarwinNotificationActionOption>{
                 DarwinNotificationActionOption.foreground,
               },
             ),
           ],
-          options: {
+          options: <DarwinNotificationCategoryOption>{
             DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
             DarwinNotificationCategoryOption.allowAnnouncement,
             DarwinNotificationCategoryOption.allowInCarPlay,
