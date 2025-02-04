@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
 import 'services/storage_service.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await NotificationService.instance.initialize();
+  await NotificationService.instance.requestPermissions();
+
   runApp(const MyApp());
 }
 
@@ -95,6 +101,8 @@ class _MyAppState extends State<MyApp> {
       home: HomeScreen(
         onThemeChanged: _handleThemeChanged,
         onLocaleChanged: _handleLocaleChanged,
+        isDarkMode: _themeMode == ThemeMode.dark,
+        currentLocale: _locale,
       ),
     );
   }
