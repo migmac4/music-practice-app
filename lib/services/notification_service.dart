@@ -28,7 +28,19 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+      notificationCategories: [
+        DarwinNotificationCategory(
+          'daily_reminder',
+          options: {
+            DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+            DarwinNotificationCategoryOption.allowAnnouncement,
+            DarwinNotificationCategoryOption.allowInCarPlay,
+          },
+        ),
+      ],
     );
+
+    print('DEBUG: Initializing notifications with iOS settings: $iosSettings');
 
     await _notifications.initialize(
       const InitializationSettings(
@@ -140,8 +152,9 @@ class NotificationService {
             presentBadge: true,
             presentSound: true,
             sound: 'default',
-            interruptionLevel: InterruptionLevel.critical,
-            criticalAlertLevel: CriticalAlertLevel.high,
+            interruptionLevel: InterruptionLevel.timeSensitive,
+            threadIdentifier: 'daily_reminder',
+            categoryIdentifier: 'daily_reminder',
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -150,6 +163,7 @@ class NotificationService {
         matchDateTimeComponents: DateTimeComponents.time,
       );
       print('DEBUG: Notification scheduled successfully');
+      print('DEBUG: Notification settings - Title: $title, Body: $body, Time: ${scheduledTZDate.toString()}');
     } catch (e) {
       print('ERROR: Failed to schedule notification: $e');
       print('ERROR Stack trace: ${StackTrace.current}');
