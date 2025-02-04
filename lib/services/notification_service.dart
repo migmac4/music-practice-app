@@ -125,6 +125,9 @@ class NotificationService {
     );
 
     try {
+      print('DEBUG: Scheduling notification for ${scheduledTZDate.toString()}');
+      print('DEBUG: Android Details: ${androidDetails.toString()}');
+      
       await _notifications.zonedSchedule(
         0,
         title,
@@ -137,7 +140,8 @@ class NotificationService {
             presentBadge: true,
             presentSound: true,
             sound: 'default',
-            interruptionLevel: InterruptionLevel.timeSensitive,
+            interruptionLevel: InterruptionLevel.critical,
+            criticalAlertLevel: CriticalAlertLevel.high,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -145,8 +149,8 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+      print('DEBUG: Notification scheduled successfully');
     } catch (e) {
-      // Keep error logging for debugging purposes
       print('ERROR: Failed to schedule notification: $e');
       print('ERROR Stack trace: ${StackTrace.current}');
     }

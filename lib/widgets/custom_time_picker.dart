@@ -17,20 +17,37 @@ class CustomTimePicker extends StatefulWidget {
 class _CustomTimePickerState extends State<CustomTimePicker> {
   late int selectedHour;
   late int selectedMinute;
+  late bool isAM;
 
   @override
   void initState() {
     super.initState();
     selectedHour = widget.initialTime.hour;
     selectedMinute = widget.initialTime.minute;
+    isAM = selectedHour < 12;
+    if (!MediaQuery.of(context).alwaysUse24HourFormat) {
+      selectedHour = selectedHour % 12;
+      if (selectedHour == 0) selectedHour = 12;
+    }
+  }
+
+  String _formatHour(int hour) {
+    if (MediaQuery.of(context).alwaysUse24HourFormat) {
+      return hour.toString().padLeft(2, '0');
+    } else {
+      if (hour == 0) return '12';
+      return hour.toString();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final use24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Seletor de Hora
+        // Hour Selector
         SizedBox(
           width: 70,
           height: 200,
@@ -40,25 +57,23 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             diameterRatio: 1.2,
             physics: const FixedExtentScrollPhysics(),
             childDelegate: ListWheelChildBuilderDelegate(
-              childCount: MediaQuery.of(context).alwaysUse24HourFormat ? 24 : 12,
+              childCount: use24HourFormat ? 24 : 12,
               builder: (context, index) {
-                final hour = MediaQuery.of(context).alwaysUse24HourFormat 
-                  ? index 
-                  : (selectedHour >= 12 ? ((index == 0 ? 12 : index) % 12) + 12 : (index == 0 ? 12 : index));
+                final displayHour = use24HourFormat ? index : (index == 0 ? 12 : index);
+                final isSelected = selectedHour == displayHour;
+                
                 return Container(
                   decoration: BoxDecoration(
-                    color: selectedHour == hour ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+                    color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
-                      MediaQuery.of(context).alwaysUse24HourFormat
-                        ? hour.toString().padLeft(2, '0')
-                        : TimeOfDay(hour: hour, minute: 0).format(context),
+                      _formatHour(displayHour),
                       style: TextStyle(
-                        fontSize: selectedHour == hour ? 24 : 20,
-                        fontWeight: selectedHour == hour ? FontWeight.bold : FontWeight.normal,
-                        color: selectedHour == hour 
+                        fontSize: isSelected ? 24 : 20,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected 
                           ? (Theme.of(context).brightness == Brightness.dark 
                               ? Colors.white 
                               : Theme.of(context).primaryColor)
@@ -71,10 +86,13 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             ),
             onSelectedItemChanged: (index) {
               setState(() {
-                selectedHour = MediaQuery.of(context).alwaysUse24HourFormat 
-                  ? index 
-                  : (selectedHour >= 12 ? ((index == 0 ? 12 : index) % 12) + 12 : (index == 0 ? 12 : index));
-                widget.onTimeChanged(TimeOfDay(hour: selectedHour, minute: selectedMinute));
+                if (use24HourFormat) {
+                  selectedHour = index;
+                } else {
+                  selectedHour = index == 0 ? 12 : index;
+                  final actualHour = isAM ? selectedHour % 12 : (selectedHour % 12) + 12;
+                  widget.onTimeChanged(TimeOfDay(hour: actualHour, minute: selectedMinute));
+                }
               });
             },
           ),
@@ -86,7 +104,7 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
-        // Seletor de Minutos
+        // Minute Selector
         SizedBox(
           width: 70,
           height: 200,
@@ -98,18 +116,20 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             childDelegate: ListWheelChildBuilderDelegate(
               childCount: 12,
               builder: (context, index) {
+                final minute = index * 5;
+                final isSelected = selectedMinute == minute;
                 return Container(
                   decoration: BoxDecoration(
-                    color: selectedMinute == index * 5 ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+                    color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
-                      (index * 5).toString().padLeft(2, '0'),
+                      minute.toString().padLeft(2, '0'),
                       style: TextStyle(
-                        fontSize: selectedMinute == index * 5 ? 24 : 20,
-                        fontWeight: selectedMinute == index * 5 ? FontWeight.bold : FontWeight.normal,
-                        color: selectedMinute == index * 5 
+                        fontSize: isSelected ? 24 : 20,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected 
                           ? (Theme.of(context).brightness == Brightness.dark 
                               ? Colors.white 
                               : Theme.of(context).primaryColor)
@@ -123,11 +143,44 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
             onSelectedItemChanged: (index) {
               setState(() {
                 selectedMinute = index * 5;
-                widget.onTimeChanged(TimeOfDay(hour: selectedHour, minute: selectedMinute));
+                if (!use24HourFormat) {
+                  final actualHour = isAM ? selectedHour % 12 : (selectedHour % 12) + 12;
+                  widget.onTimeChanged(TimeOfDay(hour: actualHour, minute: selectedMinute));
+                } else {
+                  widget.onTimeChanged(TimeOfDay(hour: selectedHour, minute: selectedMinute));
+                }
               });
             },
           ),
         ),
+        if (!use24HourFormat) ...[
+          const SizedBox(width: 16),
+          // AM/PM Selector
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                isAM = !isAM;
+                final actualHour = isAM ? selectedHour % 12 : (selectedHour % 12) + 12;
+                widget.onTimeChanged(TimeOfDay(hour: actualHour, minute: selectedMinute));
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                isAM ? 'AM' : 'PM',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
