@@ -1,7 +1,8 @@
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dev.flutter.flutter-gradle-plugin'
 }
 
 def localProperties = new Properties()
@@ -27,18 +28,22 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def room_version = "2.6.1"
+
 android {
     namespace "com.miguelmacedo.music_practice_app"
-    compileSdkVersion flutter.compileSdkVersion
+    
+    compileSdk 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -47,21 +52,41 @@ android {
 
     defaultConfig {
         applicationId "com.miguelmacedo.music_practice_app"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdk 21
+        targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    lint {
+        disable 'InvalidPackage'
     }
 }
 
+flutter {
+    source '../..'
+}
+
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    
+    // Adiciona dependências específicas do AndroidX
+    implementation 'androidx.window:window:1.2.0'
+    implementation 'androidx.window:window-java:1.2.0'
+
+    // Room Database
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 }
