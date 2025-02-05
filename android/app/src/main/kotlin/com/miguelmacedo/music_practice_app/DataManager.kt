@@ -11,6 +11,10 @@ class DataManager(private val context: Context) {
     companion object {
         private const val THEME_KEY = "theme_mode"
         private const val LOCALE_KEY = "app_locale"
+        private const val DEFAULT_INSTRUMENT_KEY = "default_instrument"
+        private const val REMINDER_ENABLED_KEY = "reminder_enabled"
+        private const val REMINDER_HOUR_KEY = "reminder_hour"
+        private const val REMINDER_MINUTE_KEY = "reminder_minute"
     }
 
     suspend fun saveThemeMode(isDarkMode: Boolean) = withContext(Dispatchers.IO) {
@@ -29,7 +33,30 @@ class DataManager(private val context: Context) {
         return@withContext prefs.getString(LOCALE_KEY, null)
     }
 
-    suspend fun getPractices(): List<Map<String, Any>> = withContext(Dispatchers.IO) {
-        return@withContext emptyList()
+    suspend fun saveDefaultInstrument(instrumentId: String) = withContext(Dispatchers.IO) {
+        prefs.edit().putString(DEFAULT_INSTRUMENT_KEY, instrumentId).apply()
+    }
+
+    suspend fun getDefaultInstrument(): String? = withContext(Dispatchers.IO) {
+        return@withContext prefs.getString(DEFAULT_INSTRUMENT_KEY, null)
+    }
+
+    suspend fun saveDailyReminder(enabled: Boolean, hour: Int, minute: Int) = withContext(Dispatchers.IO) {
+        prefs.edit()
+            .putBoolean(REMINDER_ENABLED_KEY, enabled)
+            .putInt(REMINDER_HOUR_KEY, hour)
+            .putInt(REMINDER_MINUTE_KEY, minute)
+            .apply()
+    }
+
+    suspend fun getDailyReminder(): Map<String, Any>? = withContext(Dispatchers.IO) {
+        val enabled = prefs.getBoolean(REMINDER_ENABLED_KEY, false)
+        val hour = prefs.getInt(REMINDER_HOUR_KEY, 0)
+        val minute = prefs.getInt(REMINDER_MINUTE_KEY, 0)
+        return@withContext mapOf(
+            "enabled" to enabled,
+            "hour" to hour,
+            "minute" to minute
+        )
     }
 } 

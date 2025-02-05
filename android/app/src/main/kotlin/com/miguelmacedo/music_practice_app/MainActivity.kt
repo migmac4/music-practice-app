@@ -70,19 +70,53 @@ class MainActivity: FlutterActivity() {
                             }
                         }
                     }
-                    else -> result.notImplemented()
-                }
-            }
-
-        // Data Manager Channel
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.miguelmacedo.music_practice_app/data_manager")
-            .setMethodCallHandler { call, result ->
-                when (call.method) {
-                    "getPractices" -> {
+                    "saveDefaultInstrument" -> {
+                        val instrumentId = call.argument<String>("instrumentId")
+                        if (instrumentId != null) {
+                            scope.launch {
+                                try {
+                                    dataManager.saveDefaultInstrument(instrumentId)
+                                    result.success(null)
+                                } catch (e: Exception) {
+                                    result.error("ERROR", e.message, null)
+                                }
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENTS", "instrumentId is required", null)
+                        }
+                    }
+                    "getDefaultInstrument" -> {
                         scope.launch {
                             try {
-                                val practices = dataManager.getPractices()
-                                result.success(practices)
+                                val instrumentId = dataManager.getDefaultInstrument()
+                                result.success(instrumentId)
+                            } catch (e: Exception) {
+                                result.error("ERROR", e.message, null)
+                            }
+                        }
+                    }
+                    "saveDailyReminder" -> {
+                        val enabled = call.argument<Boolean>("enabled")
+                        val hour = call.argument<Int>("hour")
+                        val minute = call.argument<Int>("minute")
+                        if (enabled != null && hour != null && minute != null) {
+                            scope.launch {
+                                try {
+                                    dataManager.saveDailyReminder(enabled, hour, minute)
+                                    result.success(null)
+                                } catch (e: Exception) {
+                                    result.error("ERROR", e.message, null)
+                                }
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENTS", "enabled, hour and minute are required", null)
+                        }
+                    }
+                    "getDailyReminder" -> {
+                        scope.launch {
+                            try {
+                                val reminder = dataManager.getDailyReminder()
+                                result.success(reminder)
                             } catch (e: Exception) {
                                 result.error("ERROR", e.message, null)
                             }
