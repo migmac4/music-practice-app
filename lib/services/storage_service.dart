@@ -9,6 +9,8 @@ abstract class StorageService {
   Future<String?> getDefaultInstrument();
   Future<void> saveDailyReminder(bool enabled, int hour, int minute);
   Future<Map<String, dynamic>?> getDailyReminder();
+  Future<void> saveDailyGoal(int minutes);
+  Future<int?> getDailyGoal();
 }
 
 class NativeStorageService implements StorageService {
@@ -121,6 +123,35 @@ class NativeStorageService implements StorageService {
       return Map<String, dynamic>.from(result as Map);
     } catch (e) {
       print('Error getting daily reminder: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<void> saveDailyGoal(int minutes) async {
+    try {
+      print('DEBUG StorageService: Saving daily goal: $minutes');
+      await _platform.invokeMethod('saveDailyGoal', {'minutes': minutes});
+      print('DEBUG StorageService: Daily goal saved successfully');
+    } catch (e) {
+      print('DEBUG StorageService: Error saving daily goal: $e');
+      throw e;
+    }
+  }
+
+  @override
+  Future<int?> getDailyGoal() async {
+    try {
+      print('DEBUG StorageService: Fetching daily goal');
+      final result = await _platform.invokeMethod('getDailyGoal');
+      print('DEBUG StorageService: Daily goal fetched: $result');
+      if (result is! int) {
+        print('DEBUG StorageService: Invalid type returned: ${result.runtimeType}');
+        return null;
+      }
+      return result;
+    } catch (e) {
+      print('DEBUG StorageService: Error getting daily goal: $e');
       return null;
     }
   }

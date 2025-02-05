@@ -149,5 +149,17 @@
     "practiceCategoryReadingTechniques": "Reading Techniques",
     "practiceCategorySynthesizerAndSampling": "Synthesizer & Sampling",
     "practiceCategoryScalesAndMelody": "Scales & Melody",
-    "practiceCategoryRhythmAndTiming": "Rhythm & Timing"
+    "practiceCategoryRhythmAndTiming": "Rhythm & Timing",
+    "dailyGoal": "Daily Goal",
+    "@dailyGoal": {
+        "description": "Daily practice goal section title"
+    },
+    "dailyGoalMinutes": "Minutes per day",
+    "@dailyGoalMinutes": {
+        "description": "Daily goal in minutes"
+    },
+    "dailyGoalHint": "Enter time in minutes",
+    "@dailyGoalHint": {
+        "description": "Hint text for daily goal input"
+    }
 } 

@@ -95,6 +95,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: _getDashboardStats(),
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(

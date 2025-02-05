@@ -2,7 +2,7 @@
     "appTitle": "Prática Musical",
     "homeTitle": "Bem-vindo à Prática Musical",
     "practiceNow": "Praticar Agora",
-    "settings": "Configurações",
+    "settings": "Ajustes",
     "language": "Idioma",
     "dashboardTotalTime": "Tempo Total Hoje",
     "dashboardExercises": "Exercícios Hoje",
@@ -51,6 +51,7 @@
         "description": "Body text for the reminder notification"
     },
     "instrument": "Instrumento",
+    "defaultInstrument": "Instrumento Padrão",
     "instrumentAcousticGuitar": "Violão",
     "instrumentBass": "Baixo",
     "instrumentCello": "Violoncelo",
@@ -92,5 +93,8 @@
     "practiceCategoryReadingTechniques": "Técnicas de Leitura",
     "practiceCategorySynthesizerAndSampling": "Sintetizador e Sampling",
     "practiceCategoryScalesAndMelody": "Escalas e Melodia",
-    "practiceCategoryRhythmAndTiming": "Ritmo e Tempo"
+    "practiceCategoryRhythmAndTiming": "Ritmo e Tempo",
+    "dailyGoal": "Objetivo Diário",
+    "dailyGoalMinutes": "Minutos por dia",
+    "dailyGoalHint": "Digite o tempo em minutos"
 } 

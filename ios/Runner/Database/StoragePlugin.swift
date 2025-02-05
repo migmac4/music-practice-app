@@ -142,6 +142,24 @@ public class StoragePlugin: NSObject, FlutterPlugin {
                     logger.debug("Retrieved default instrument from UserDefaults: \(String(describing: instrumentId))")
                     result(instrumentId)
                     
+                case "saveDailyGoal":
+                    if let args = call.arguments as? [String: Any],
+                       let minutes = args["minutes"] as? Int {
+                        UserDefaults.standard.set(minutes, forKey: "daily_goal")
+                        logger.debug("Daily goal saved: \(minutes)")
+                        result(nil)
+                    } else {
+                        logger.error("Invalid arguments for saveDailyGoal")
+                        result(FlutterError(code: "INVALID_ARGUMENTS",
+                                          message: "Invalid arguments for saveDailyGoal",
+                                          details: nil))
+                    }
+                    
+                case "getDailyGoal":
+                    let minutes = UserDefaults.standard.integer(forKey: "daily_goal")
+                    logger.debug("Retrieved daily goal: \(minutes)")
+                    result(minutes)
+                    
                 default:
                     logger.error("Method not implemented: \(call.method)")
                     result(FlutterMethodNotImplemented)

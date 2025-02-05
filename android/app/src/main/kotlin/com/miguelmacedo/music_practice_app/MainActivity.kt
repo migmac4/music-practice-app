@@ -122,6 +122,31 @@ class MainActivity: FlutterActivity() {
                             }
                         }
                     }
+                    "saveDailyGoal" -> {
+                        val minutes = call.argument<Int>("minutes")
+                        if (minutes != null) {
+                            scope.launch {
+                                try {
+                                    dataManager.saveDailyGoal(minutes)
+                                    result.success(null)
+                                } catch (e: Exception) {
+                                    result.error("ERROR", e.message, null)
+                                }
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENTS", "minutes is required", null)
+                        }
+                    }
+                    "getDailyGoal" -> {
+                        scope.launch {
+                            try {
+                                val minutes = dataManager.getDailyGoal()
+                                result.success(minutes)
+                            } catch (e: Exception) {
+                                result.error("ERROR", e.message, null)
+                            }
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }

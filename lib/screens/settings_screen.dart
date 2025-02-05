@@ -30,41 +30,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String _currentLanguage = widget.currentLocale.languageCode;
   bool _isReminderEnabled = false;
   TimeOfDay? _reminderTime;
-  Instrument _selectedInstrument = Instrument.acousticGuitar; // Default instrument
+  Instrument _selectedInstrument = Instrument.acousticGuitar;
+  int _dailyGoal = 30; // Valor padrão de 30 minutos
+  final _dailyGoalController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _dailyGoalController.addListener(() {
+      if (!_dailyGoalController.text.isEmpty) {
+        final minutes = int.tryParse(_dailyGoalController.text);
+        if (minutes != null && minutes > 0 && minutes != _dailyGoal) {
+          _updateDailyGoal(_dailyGoalController.text);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _dailyGoalController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSettings() async {
-    final locale = await _storageService.getLocale();
-    final reminder = await _storageService.getDailyReminder();
-    final defaultInstrument = await _storageService.getDefaultInstrument();
+    try {
+      final locale = await _storageService.getLocale();
+      final reminder = await _storageService.getDailyReminder();
+      final defaultInstrument = await _storageService.getDefaultInstrument();
+      final dailyGoal = await _storageService.getDailyGoal();
+      
+      print('DEBUG: Loading daily goal from storage: $dailyGoal');
 
-    if (mounted) {
-      setState(() {
-        _currentLanguage = locale ?? 'en';
-        _isReminderEnabled = reminder?['enabled'] as bool? ?? false;
-        _reminderTime = reminder != null
-            ? TimeOfDay(hour: reminder['hour'] as int, minute: reminder['minute'] as int)
-            : const TimeOfDay(hour: 9, minute: 0);
-        if (defaultInstrument != null) {
-          _selectedInstrument = Instrument.values.firstWhere(
-            (i) => i.name == defaultInstrument,
-            orElse: () => Instrument.acousticGuitar,
-          );
-        }
-      });
+      if (mounted) {
+        setState(() {
+          _currentLanguage = locale ?? 'en';
+          _isReminderEnabled = reminder?['enabled'] as bool? ?? false;
+          _reminderTime = reminder != null
+              ? TimeOfDay(hour: reminder['hour'] as int, minute: reminder['minute'] as int)
+              : const TimeOfDay(hour: 9, minute: 0);
+          if (defaultInstrument != null) {
+            _selectedInstrument = Instrument.values.firstWhere(
+              (i) => i.name == defaultInstrument,
+              orElse: () => Instrument.acousticGuitar,
+            );
+          }
+          if (dailyGoal != null) {
+            print('DEBUG: Setting daily goal to: $dailyGoal');
+            _dailyGoal = dailyGoal;
+            _dailyGoalController.text = dailyGoal.toString();
+          } else {
+            print('DEBUG: No daily goal found, setting default to 30');
+            _dailyGoal = 30;
+            _dailyGoalController.text = '30';
+            // Salvar o valor padrão se não existir
+            _storageService.saveDailyGoal(30);
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading settings: $e');
+      // Em caso de erro, garantir que pelo menos o valor padrão seja exibido
+      if (mounted) {
+        setState(() {
+          _dailyGoal = 30;
+          _dailyGoalController.text = '30';
+        });
+      }
     }
   }
 
-  Future<void> _toggleTheme() async {
+  Future<void> _toggleTheme(bool value) async {
     try {
-      final newMode = !widget.isDarkMode;
-      await _storageService.saveThemeMode(newMode);
-      widget.onThemeChanged(newMode);
+      await _storageService.saveThemeMode(value);
+      widget.onThemeChanged(value);
     } catch (e) {
       print('SettingsScreen - Error toggling theme: $e');
     }
@@ -236,6 +276,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _updateDailyGoal(String value) async {
+    print('DEBUG: Attempting to update daily goal with value: $value');
+    final minutes = int.tryParse(value);
+    if (minutes != null && minutes > 0) {
+      print('DEBUG: Valid minutes value: $minutes');
+      setState(() {
+        _dailyGoal = minutes;
+      });
+      try {
+        print('DEBUG: Saving daily goal to storage: $minutes');
+        await _storageService.saveDailyGoal(minutes);
+        print('DEBUG: Daily goal saved successfully');
+      } catch (e) {
+        print('DEBUG: Error saving daily goal: $e');
+        // Restaurar o valor anterior em caso de erro
+        setState(() {
+          _dailyGoal = int.tryParse(_dailyGoalController.text) ?? 30;
+        });
+      }
+    } else {
+      print('DEBUG: Invalid minutes value: $value');
+      // Restaurar o valor anterior se o input for inválido
+      setState(() {
+        _dailyGoalController.text = _dailyGoal.toString();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -248,79 +316,464 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settings),
+        leading: BackButton(
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: [
-          ListTile(
-            title: Text(l10n.instrument),
-            trailing: DropdownButton<Instrument>(
-              value: _selectedInstrument,
-              items: sortedInstruments.map((Instrument instrument) {
-                return DropdownMenuItem<Instrument>(
-                  value: instrument,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgPicture.asset(
-                        instrument.iconPath,
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                          Theme.of(context).iconTheme.color ?? Colors.black,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(_getInstrumentName(instrument, l10n)),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: _onInstrumentChanged,
-            ),
-          ),
-          ListTile(
-            title: Text(l10n.darkMode),
-            trailing: Switch(
-              value: widget.isDarkMode,
-              onChanged: (bool value) => _toggleTheme(),
-            ),
-          ),
-          ListTile(
-            title: Text(l10n.language),
-            trailing: DropdownButton<String>(
-              value: _currentLanguage,
-              items: ['en', 'pt'].map((String code) {
-                return DropdownMenuItem<String>(
-                  value: code,
-                  child: Text(_getDisplayLanguage(code)),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  _changeLocale(newValue);
-                }
-              },
-            ),
-          ),
-          ListTile(
-            title: Text(l10n.dailyReminder),
-            trailing: Switch(
-              value: _isReminderEnabled,
-              onChanged: _toggleReminder,
-            ),
-          ),
-          if (_isReminderEnabled)
-            ListTile(
-              title: Text(l10n.reminderTime),
-              trailing: TextButton(
-                onPressed: _selectReminderTime,
-                child: Text(
-                  _reminderTime != null ? _formatTimeOfDay(_reminderTime!) : '--:--',
-                  style: theme.textTheme.titleMedium,
-                ),
+          // Theme Section
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+                width: 1,
               ),
             ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          widget.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                          color: theme.colorScheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.isDarkMode ? l10n.darkMode : l10n.lightMode,
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ),
+                      Switch(
+                        value: widget.isDarkMode,
+                        onChanged: _toggleTheme,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Daily Goal Section
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.flag_rounded,
+                      color: theme.colorScheme.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    l10n.dailyGoal,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const Spacer(),
+                  Container(
+                    width: 120,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _dailyGoalController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.end,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '0',
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              isDense: true,
+                              constraints: const BoxConstraints(maxHeight: 40),
+                              hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            onSubmitted: _updateDailyGoal,
+                            onEditingComplete: () {
+                              _updateDailyGoal(_dailyGoalController.text);
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            'min',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Daily Reminder Section
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.notifications_outlined,
+                          color: theme.colorScheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.dailyReminder,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const Spacer(),
+                      Switch(
+                        value: _isReminderEnabled,
+                        onChanged: _toggleReminder,
+                      ),
+                    ],
+                  ),
+                  if (_isReminderEnabled) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                        visualDensity: VisualDensity.compact,
+                        minVerticalPadding: 0,
+                        title: Text(
+                          l10n.reminderTime,
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                        trailing: TextButton(
+                          onPressed: _selectReminderTime,
+                          child: Text(
+                            _reminderTime != null ? _formatTimeOfDay(_reminderTime!) : '--:--',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // Language Section
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.language,
+                      color: theme.colorScheme.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    l10n.language,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const Spacer(),
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    constraints: const BoxConstraints(maxHeight: 40),
+                    child: DropdownButton<String>(
+                      value: _currentLanguage,
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          _changeLocale(newValue);
+                        }
+                      },
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'en',
+                          child: Text('English'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'pt',
+                          child: Text('Português'),
+                        ),
+                      ],
+                      underline: const SizedBox(),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      menuMaxHeight: 300,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Default Instrument Section
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: SvgPicture.asset(
+                      _selectedInstrument.iconPath,
+                      width: 24,
+                      height: 24,
+                      colorFilter: ColorFilter.mode(
+                        theme.colorScheme.primary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    l10n.instrument,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const Spacer(),
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => Container(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(28),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    width: 32,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Text(
+                                      l10n.instrument,
+                                      style: theme.textTheme.titleLarge,
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  Flexible(
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: sortedInstruments.length,
+                                      itemBuilder: (context, index) {
+                                        final instrument = sortedInstruments[index];
+                                        final isSelected = instrument == _selectedInstrument;
+                                        return ListTile(
+                                          leading: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                ? theme.colorScheme.primary.withOpacity(0.1)
+                                                : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: SvgPicture.asset(
+                                              instrument.iconPath,
+                                              width: 24,
+                                              height: 24,
+                                              colorFilter: ColorFilter.mode(
+                                                isSelected
+                                                  ? theme.colorScheme.primary
+                                                  : theme.colorScheme.onSurfaceVariant,
+                                                BlendMode.srcIn,
+                                              ),
+                                            ),
+                                          ),
+                                          title: Text(
+                                            _getInstrumentName(instrument, l10n),
+                                            style: theme.textTheme.bodyLarge?.copyWith(
+                                              color: isSelected
+                                                ? theme.colorScheme.primary
+                                                : theme.colorScheme.onSurface,
+                                              fontWeight: isSelected ? FontWeight.bold : null,
+                                            ),
+                                          ),
+                                          trailing: isSelected
+                                            ? Icon(
+                                                Icons.check_circle,
+                                                color: theme.colorScheme.primary,
+                                              )
+                                            : null,
+                                          onTap: () {
+                                            _onInstrumentChanged(instrument);
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  SafeArea(
+                                    child: Container(
+                                      height: 8,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _getInstrumentName(_selectedInstrument, l10n),
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

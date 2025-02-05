@@ -183,7 +183,9 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Theme.of(context).primaryColor,
                 ),
               ),
             ),

@@ -15,6 +15,7 @@ class DataManager(private val context: Context) {
         private const val REMINDER_ENABLED_KEY = "reminder_enabled"
         private const val REMINDER_HOUR_KEY = "reminder_hour"
         private const val REMINDER_MINUTE_KEY = "reminder_minute"
+        private const val DAILY_GOAL_KEY = "daily_goal"
     }
 
     suspend fun saveThemeMode(isDarkMode: Boolean) = withContext(Dispatchers.IO) {
@@ -58,5 +59,13 @@ class DataManager(private val context: Context) {
             "hour" to hour,
             "minute" to minute
         )
+    }
+
+    suspend fun saveDailyGoal(minutes: Int) = withContext(Dispatchers.IO) {
+        prefs.edit().putInt(DAILY_GOAL_KEY, minutes).apply()
+    }
+
+    suspend fun getDailyGoal(): Int = withContext(Dispatchers.IO) {
+        return@withContext prefs.getInt(DAILY_GOAL_KEY, 30) // 30 minutos como valor padrão
     }
 } 
