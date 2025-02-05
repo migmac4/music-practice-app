@@ -3,15 +3,20 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../widgets/dashboard_card.dart';
 import '../data/data_manager.dart';
 import '../services/storage_service.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(bool) onThemeChanged;
   final Function(String) onLocaleChanged;
+  final bool isDarkMode;
+  final Locale currentLocale;
   
   const HomeScreen({
     super.key,
     required this.onThemeChanged,
     required this.onLocaleChanged,
+    required this.isDarkMode,
+    required this.currentLocale,
   });
 
   @override
@@ -19,68 +24,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _storageService = NativeStorageService();
-  bool _isDarkMode = false;
-  Locale _currentLocale = const Locale('en');
-
-  @override
-  void initState() {
-    super.initState();
-    _loadThemeMode();
-    _loadLocale();
-  }
-
-  Future<void> _loadLocale() async {
-    try {
-      final savedLocale = await _storageService.getLocale();
-      if (savedLocale != null && mounted) {
-        setState(() {
-          _currentLocale = Locale(savedLocale);
-        });
-      }
-    } catch (e) {
-      // Error handling
-    }
-  }
-
-  Future<void> _changeLocale(String languageCode) async {
-    try {
-      setState(() {
-        _currentLocale = Locale(languageCode);
-      });
-      await _storageService.saveLocale(languageCode);
-      widget.onLocaleChanged(languageCode);
-    } catch (e) {
-      // Error handling
-    }
-  }
-
-  Future<void> _loadThemeMode() async {
-    try {
-      final savedMode = await _storageService.getThemeMode();
-      if (savedMode != null && mounted) {
-        setState(() {
-          _isDarkMode = savedMode;
-        });
-      }
-    } catch (e) {
-      // Error handling
-    }
-  }
-
-  Future<void> _toggleTheme() async {
-    try {
-      final newMode = !_isDarkMode;
-      setState(() {
-        _isDarkMode = newMode;
-      });
-      await _storageService.saveThemeMode(newMode);
-      widget.onThemeChanged(newMode);
-    } catch (e) {
-      // Error handling
-    }
-  }
-
   String _formatDuration(Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
@@ -120,6 +63,20 @@ class _HomeScreenState extends State<HomeScreen> {
     };
   }
 
+  void _openSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SettingsScreen(
+          onThemeChanged: widget.onThemeChanged,
+          onLocaleChanged: widget.onLocaleChanged,
+          isDarkMode: widget.isDarkMode,
+          currentLocale: widget.currentLocale,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -129,43 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            icon: Icon(
-              _isDarkMode ? Icons.light_mode : Icons.dark_mode,
-            ),
-            onPressed: _toggleTheme,
-            tooltip: _isDarkMode ? l10n.lightMode : l10n.darkMode,
-          ),
-          PopupMenuButton<String>(
-            onSelected: _changeLocale,
-            tooltip: l10n.language,
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem<String>(
-                  value: 'en',
-                  child: Row(
-                    children: [
-                      if (_currentLocale.languageCode == 'en')
-                        const Icon(Icons.check, size: 18),
-                      if (_currentLocale.languageCode == 'en')
-                        const SizedBox(width: 8),
-                      const Text('English'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<String>(
-                  value: 'pt',
-                  child: Row(
-                    children: [
-                      if (_currentLocale.languageCode == 'pt')
-                        const Icon(Icons.check, size: 18),
-                      if (_currentLocale.languageCode == 'pt')
-                        const SizedBox(width: 8),
-                      const Text('Português'),
-                    ],
-                  ),
-                ),
-              ];
-            },
+            icon: const Icon(Icons.settings),
+            onPressed: _openSettings,
+            tooltip: l10n.settings,
           ),
         ],
       ),

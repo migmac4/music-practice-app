@@ -193,9 +193,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String _formatTimeOfDay(TimeOfDay time) {
     final context = this.context;
-    return MediaQuery.of(context).alwaysUse24HourFormat
-        ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'
-        : time.format(context);
+    
+    if (MediaQuery.of(context).alwaysUse24HourFormat) {
+      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    }
+    
+    // Formato 12 horas
+    final hour = time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    
+    // Ajusta para exibir 12 ao invés de 0 para meio-dia/meia-noite
+    final hourDisplay = hour == 0 ? 12 : hour;
+    
+    return '$hourDisplay:$minute $period';
   }
 
   String _getInstrumentName(Instrument instrument, AppLocalizations l10n) {
