@@ -27,7 +27,11 @@ class NativeStorageService implements StorageService {
   Future<bool?> getThemeMode() async {
     try {
       final result = await _platform.invokeMethod('getThemeMode');
-      return result as bool?;
+      if (result is! bool) {
+        print('Error: getThemeMode returned invalid type: ${result.runtimeType}');
+        return null;
+      }
+      return result;
     } catch (e) {
       print('Error getting theme mode: $e');
       return null;
@@ -47,7 +51,11 @@ class NativeStorageService implements StorageService {
   Future<String?> getLocale() async {
     try {
       final result = await _platform.invokeMethod('getLocale');
-      return result as String?;
+      if (result is! String) {
+        print('Error: getLocale returned invalid type: ${result.runtimeType}');
+        return null;
+      }
+      return result;
     } catch (e) {
       print('Error getting locale: $e');
       return null;
@@ -67,7 +75,11 @@ class NativeStorageService implements StorageService {
   Future<String?> getDefaultInstrument() async {
     try {
       final result = await _platform.invokeMethod('getDefaultInstrument');
-      return result as String?;
+      if (result is! String) {
+        print('Error: getDefaultInstrument returned invalid type: ${result.runtimeType}');
+        return null;
+      }
+      return result;
     } catch (e) {
       print('Error getting default instrument: $e');
       return null;
@@ -76,6 +88,13 @@ class NativeStorageService implements StorageService {
 
   @override
   Future<void> saveDailyReminder(bool enabled, int hour, int minute) async {
+    if (hour < 0 || hour > 23) {
+      throw ArgumentError('Hour must be between 0 and 23');
+    }
+    if (minute < 0 || minute > 59) {
+      throw ArgumentError('Minute must be between 0 and 59');
+    }
+
     try {
       await _platform.invokeMethod('saveDailyReminder', {
         'enabled': enabled,
@@ -92,6 +111,11 @@ class NativeStorageService implements StorageService {
     try {
       final result = await _platform.invokeMethod('getDailyReminder');
       if (result == null) return null;
+      
+      if (result is! Map) {
+        print('Error: getDailyReminder returned invalid type: ${result.runtimeType}');
+        return null;
+      }
       
       // Convert the platform-specific map to a Dart Map<String, dynamic>
       return Map<String, dynamic>.from(result as Map);
